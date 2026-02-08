@@ -230,7 +230,6 @@ public class PokemonUtils {
         return false;
     }
 
-
     public static boolean isSpecialMove(Move move) {
         return Objects.equals(move.getDamageCategory(), DamageCategories.INSTANCE.getSPECIAL());
     }
@@ -303,7 +302,6 @@ public class PokemonUtils {
             }
         }
     }
-
 
     public static void sendAnimationPacket(PokemonEntity pokemonEntity, String mode) {
         if (!pokemonEntity.level().isClientSide) {

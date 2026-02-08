@@ -28,6 +28,7 @@ public class PokemonNearestAttackableTargetGoal<T extends LivingEntity> extends 
             if (!PokemonUtils.WildPokemonCanPerformUnprovokedAttack(pokemonEntity)) {
                 return false;
             }
+            /*
             if (CobblemonFightOrFlight.commonConfig().enable_datapack_driven_behavior) {
                 ++ticksNextDataBehaviorCheckCycle;
                 if (ticksNextDataBehaviorCheckCycle == 20) {
@@ -46,7 +47,7 @@ public class PokemonNearestAttackableTargetGoal<T extends LivingEntity> extends 
                         }
                     }
                 }
-            }
+            }*/
             if (CobblemonFightOrFlight.getFightOrFlightCoefficient(pokemonEntity) <= CobblemonFightOrFlight.AUTO_AGGRO_THRESHOLD() || (CobblemonFightOrFlight.commonConfig().light_dependent_unprovoked_attack && pokemonEntity.getLightLevelDependentMagicValue() >= 0.5f)) {
                 return false;
             } else {

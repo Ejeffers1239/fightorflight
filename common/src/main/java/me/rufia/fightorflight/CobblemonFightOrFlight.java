@@ -1,6 +1,5 @@
 package me.rufia.fightorflight;
 
-import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import dev.architectury.registry.ReloadListenerRegistry;
@@ -13,6 +12,7 @@ import me.rufia.fightorflight.goals.PokemonAvoidGoal;
 import me.rufia.fightorflight.goals.PokemonGoToPosGoal;
 import me.rufia.fightorflight.goals.PokemonPanicGoal;
 import me.rufia.fightorflight.net.CobblemonFightOrFlightNetwork;
+import me.rufia.fightorflight.utils.FOFAggressionCalculator;
 import me.rufia.fightorflight.utils.FOFUtils;
 import me.rufia.fightorflight.utils.PokemonUtils;
 import me.rufia.fightorflight.utils.TargetingWhitelist;
@@ -26,13 +26,13 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.phys.AABB;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class CobblemonFightOrFlight {
@@ -105,56 +105,17 @@ public class CobblemonFightOrFlight {
             return 100 + commonConfig().aggressive_threshold;
         }
 
-        double levelAggressionCoefficient;
-        double atkDefDifCoefficient = (double) ((pokemon.getAttack() + pokemon.getSpecialAttack()) - (pokemon.getDefence() + pokemon.getSpecialDefence())) / pokemon.getLevel() * commonConfig().aggression_atk_def_dif_base_value;
-        double natureAggressionCoefficient;
-        double darknessAggressionCoefficient = 0;
-        double intimidateCoefficient = 0;
-        String natureName = PokemonUtils.getNatureName(pokemon);
-
-        if (Arrays.stream(CobblemonFightOrFlight.commonConfig().more_aggressive_nature).toList().contains(natureName)) {
-            natureAggressionCoefficient = CobblemonFightOrFlight.commonConfig().more_aggressive_nature_multiplier;
-        } else if (Arrays.stream(CobblemonFightOrFlight.commonConfig().aggressive_nature).toList().contains(natureName)) {
-            natureAggressionCoefficient = CobblemonFightOrFlight.commonConfig().aggressive_nature_multiplier;
-        } else if (Arrays.stream(CobblemonFightOrFlight.commonConfig().peaceful_nature).toList().contains(natureName)) {
-            natureAggressionCoefficient = CobblemonFightOrFlight.commonConfig().peaceful_nature_multiplier;
-        } else if (Arrays.stream(CobblemonFightOrFlight.commonConfig().more_peaceful_nature).toList().contains(natureName)) {
-            natureAggressionCoefficient = CobblemonFightOrFlight.commonConfig().more_peaceful_nature_multiplier;
-        } else {
-            natureAggressionCoefficient = 0;
+        List<String> peacefulBiomeList = Arrays.stream(CobblemonFightOrFlight.commonConfig.peaceful_biome).toList();
+        List<String> aggressiveBiomeList = Arrays.stream(CobblemonFightOrFlight.commonConfig().aggressive_biome).toList();
+        String biomeName = pokemonEntity.level().getBiome(pokemonEntity.blockPosition()).getRegisteredName();
+        if (!peacefulBiomeList.isEmpty() && peacefulBiomeList.contains(biomeName)) {
+            return -100 - commonConfig().neutral_threshold;
+        }
+        if (!aggressiveBiomeList.isEmpty() && aggressiveBiomeList.contains(biomeName)) {
+            return 100 + commonConfig().aggressive_threshold;
         }
 
-        var pokemons = pokemonEntity.level().getEntitiesOfClass(PokemonEntity.class, AABB.ofSize(pokemonEntity.position(), 18, 18, 18), (pokemonEntity1) -> pokemonEntity1.getOwner() != null && Arrays.stream(CobblemonFightOrFlight.commonConfig().aggro_reducing_abilities).toList().contains(pokemonEntity1.getPokemon().getAbility().getName()));
-
-        if (!pokemons.isEmpty()) {
-            intimidateCoefficient = CobblemonFightOrFlight.commonConfig().aggression_intimidation_base_value;
-        }
-        ElementalType typePrimary = pokemon.getPrimaryType();
-        ElementalType typeSecondary = pokemon.getSecondaryType();
-        if (typeSecondary == null) {
-            typeSecondary = typePrimary;
-        }
-
-        boolean ghostLightLevelModifier = CobblemonFightOrFlight.commonConfig().ghost_light_level_aggro && (typePrimary.getName().equalsIgnoreCase("ghost") || typeSecondary.getName().equalsIgnoreCase("ghost"));
-        boolean darkLightLevelModifier = CobblemonFightOrFlight.commonConfig().dark_light_level_aggro && (typePrimary.getName().equalsIgnoreCase("dark") || typeSecondary.getName().equalsIgnoreCase("dark"));
-
-        if (ghostLightLevelModifier || darkLightLevelModifier) {
-            int skyDarken = pokemonEntity.level().getSkyDarken();
-            int lightLevel = pokemonEntity.level().getRawBrightness(pokemonEntity.blockPosition(), skyDarken);
-            if (lightLevel <= 7) {
-                darknessAggressionCoefficient += commonConfig().aggression_light_level_base_value;
-            } else if (lightLevel >= 12) {
-                darknessAggressionCoefficient -= commonConfig().aggression_light_level_base_value;
-            }
-        }
-
-        //Weights and Clamps:
-        levelAggressionCoefficient = commonConfig().aggression_level_base_value * commonConfig().aggression_level_multiplier * pokemon.getLevel() / 100;//5.0d * levelAggressionCoefficient;
-        //atkDefRatioCoefficient = Math.max(-pkmnLevel, atkDefRatioCoefficient);
-        natureAggressionCoefficient = commonConfig.aggression_nature_base_value * natureAggressionCoefficient;//25.0d * natureAggressionCoefficient;
-        double finalResult = levelAggressionCoefficient + atkDefDifCoefficient + natureAggressionCoefficient + darknessAggressionCoefficient + intimidateCoefficient;
-
-        return finalResult;
+        return FOFAggressionCalculator.calc(pokemonEntity);
     }
 
     public static boolean BelowAlwaysAggro(double height) {

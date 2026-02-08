@@ -1,3 +1,12 @@
+# V0.10.7:
+### New Features:
+* Added config to make the pokemon aggressive/passive in specific biomes.
+### Planned Features:
+#### This version is focused to offer some QoL features:
+* Aggressive pokemon will lose its aggression after the player is distant from the pokemon.
+* Multiplier for pokemon that is not fully evolved.
+* Battles started with this mod will use the selected Pokemon
+
 # V0.10.6:
 ### New Config:
 * force_wild_battle_on_player_attack: If this is set to true, a battle will be started when a player attacks a wild Pokemon.
