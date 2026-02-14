@@ -14,10 +14,12 @@ import com.cobblemon.mod.common.net.messages.client.effect.RunPosableMoLangPacke
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.pokemon.activestate.ShoulderedState;
 import com.cobblemon.mod.common.pokemon.evolution.progress.UseMoveEvolutionProgress;
+import dev.architectury.networking.NetworkManager;
 import me.rufia.fightorflight.CobblemonFightOrFlight;
 import me.rufia.fightorflight.PokemonInterface;
 import me.rufia.fightorflight.data.movedata.MoveData;
 import me.rufia.fightorflight.item.component.PokeStaffComponent;
+import me.rufia.fightorflight.net.packet.FOFStartBattleRequestPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -557,9 +559,8 @@ public class PokemonUtils {
                     serverOpponent,
                     null,
                     null,
-                    BattleFormat.Companion.getGEN_9_SINGLES(),
-                    false,
-                    false);
+                    BattleFormat.Companion.getGEN_9_SINGLES()
+            );
             return true;
         }
         return false;
@@ -571,14 +572,8 @@ public class PokemonUtils {
                 return false;
             }
 
-            BattleBuilder.INSTANCE.pve(serverPlayer,
-                    wildPokemon,
-                    null,
-                    BattleFormat.Companion.getGEN_9_SINGLES(),
-                    false,
-                    false,
-                    Cobblemon.config.getDefaultFleeDistance(),
-                    Cobblemon.INSTANCE.getStorage().getParty(serverPlayer));
+            FOFStartBattleRequestPacket packet = new FOFStartBattleRequestPacket(wildPokemon.getId());
+            NetworkManager.sendToPlayer(serverPlayer, packet);
             return true;
         }
         return false;
@@ -593,11 +588,7 @@ public class PokemonUtils {
             BattleBuilder.INSTANCE.pve(serverPlayer,
                     wildPokemon,
                     playerPokemon.getPokemon().getUuid(),
-                    BattleFormat.Companion.getGEN_9_SINGLES(),
-                    false,
-                    false,
-                    Cobblemon.config.getDefaultFleeDistance(),
-                    Cobblemon.INSTANCE.getStorage().getParty(serverPlayer));
+                    BattleFormat.Companion.getGEN_9_SINGLES());
             return true;
         }
         return false;

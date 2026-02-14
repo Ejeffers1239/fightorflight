@@ -1,10 +1,7 @@
 package me.rufia.fightorflight.mixin;
 
-import com.cobblemon.mod.common.CobblemonNetwork;
-import com.cobblemon.mod.common.battles.BattleFormat;
 import com.cobblemon.mod.common.client.CobblemonClient;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
-import com.cobblemon.mod.common.net.messages.server.BattleChallengePacket;
 import com.cobblemon.mod.common.net.messages.server.RequestPlayerInteractionsPacket;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import dev.architectury.networking.NetworkManager;
@@ -12,15 +9,19 @@ import me.rufia.fightorflight.client.keybinds.CommandKeybind;
 import me.rufia.fightorflight.client.keybinds.KeybindFightOrFlight;
 import me.rufia.fightorflight.item.ItemFightOrFlight;
 import me.rufia.fightorflight.item.component.PokeStaffComponent;
+import me.rufia.fightorflight.net.packet.FOFStartBattlePokemonPacket;
 import me.rufia.fightorflight.net.packet.SendCommandPacket;
 import me.rufia.fightorflight.net.packet.SendMoveSlotPacket;
 import me.rufia.fightorflight.utils.FOFUtils;
 import me.rufia.fightorflight.utils.PokemonUtils;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -38,6 +39,14 @@ public abstract class MinecraftClientInject {
     @Shadow
     @Nullable
     public LocalPlayer player;
+
+    @Shadow
+    @Nullable
+    public ClientLevel level;
+
+    @Shadow
+    @Final
+    private DeltaTracker.Timer timer;
 
     @Inject(method = "handleKeybinds", at = @At("TAIL"))
     private void postTick(CallbackInfo ci) {
@@ -95,6 +104,8 @@ public abstract class MinecraftClientInject {
     @Unique
     private void startBattle() {
         var player = getInstance().player;
+        int selectedSlot = CobblemonClient.INSTANCE.getStorage().getSelectedSlot();
+
         boolean isSpectator = player.isSpectator();
         boolean playerIsNotAvailable = CobblemonClient.INSTANCE.getBattle() != null;
         boolean otherConditions = !(CobblemonClient.INSTANCE.getStorage().getSelectedSlot() != -1 && getInstance().screen == null);
@@ -102,22 +113,22 @@ public abstract class MinecraftClientInject {
             return;
         }
 
-        Pokemon pokemon = CobblemonClient.INSTANCE.getStorage().getParty().get(CobblemonClient.INSTANCE.getStorage().getSelectedSlot());
+        Pokemon pokemon = CobblemonClient.INSTANCE.getStorage().getParty().get(selectedSlot);
         if (pokemon != null && pokemon.getCurrentHealth() > 0) {
-            var entities = player.clientLevel.getEntitiesOfClass(PokemonEntity.class, AABB.ofSize(player.getPosition(player.tickCount), 16, 16, 16),
+            var entities = player.clientLevel.getEntitiesOfClass(PokemonEntity.class, AABB.ofSize(player.getPosition(timer.getGameTimeDeltaPartialTick(level.tickRateManager().runsNormally())), 16, 16, 16),
                     (pokemonEntity) -> pokemonEntity.getTarget() == player
             );
             for (PokemonEntity pokemonEntity : entities) {
-                if (pokemonEntity.getOwner() == null && pokemonEntity.canBattle(player)) {
-                    BattleChallengePacket packet = new BattleChallengePacket(pokemonEntity.getId(), pokemon.getUuid(), BattleFormat.Companion.getGEN_9_SINGLES());
-                    CobblemonNetwork.sendToServer(packet);
+                if (pokemonEntity.canBattle(player)) {
+                    FOFStartBattlePokemonPacket packet = new FOFStartBattlePokemonPacket(pokemonEntity.getId(), pokemon.getUuid());
+                    NetworkManager.sendToServer(packet);
                     break;
                 } else if (pokemonEntity.getOwner() != player) {
                     if (pokemonEntity.getOwner() instanceof Player) {
-                        CobblemonNetwork.sendToServer(new RequestPlayerInteractionsPacket(pokemonEntity.getUUID(), pokemonEntity.getId(), pokemon.getUuid()));
-                        //break;
+                        var packet = new RequestPlayerInteractionsPacket(pokemonEntity.getUUID(), pokemonEntity.getId(), pokemon.getUuid());
+                        packet.sendToServer();
+                        break;
                     }
-                } else {
                 }
             }
         }

@@ -27,7 +27,8 @@ public class FOFMoveToAttackTargetTask {
                         var position = attackTarget.position();
                         var walkTarget = context.tryGet(walkTargetAccessor).orElse(null);
                         if (walkTarget == null || walkTarget.getTarget().currentPosition().distanceToSqr(position) > closeEnoughDistance) {
-                            livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(attackTarget, speedMultiplier, closeEnoughDistance));
+                            pokemonEntity.setTarget(attackTarget);
+                            pokemonEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(attackTarget, speedMultiplier, closeEnoughDistance));
                             return true;
                         }
                     }

@@ -534,10 +534,8 @@ public abstract class PokemonEntityMixin extends TamableAnimal implements Pokemo
         } else if (FOFHeldItemManager.canUse(pokemonEntity, CobblemonItems.BLACK_SLUDGE)) {
             if (PokemonUtils.hasType(pokemon, ElementalTypes.POISON)) {
                 heal(maxHealth / 16);
-            } else {
-                if (!PokemonUtils.abilityIs(pokemonEntity, "magicguard")) {
-                    hurt(damageSources().magic(), maxHealth / 8);
-                }
+            } else if (!PokemonUtils.abilityIs(pokemonEntity, "magicguard")) {
+                hurt(damageSources().magic(), maxHealth / 8);
             }
         }
     }
@@ -607,25 +605,23 @@ public abstract class PokemonEntityMixin extends TamableAnimal implements Pokemo
         int index = 0;
         while (index < 4) {
             FOFMove tmpMove = MOVES_FOF.get(index);
-            if (tmpMove != null) {
-                if (Objects.equals(tmpMove.getName(), oldMoveName)) {
-                    tmpMove.setRemainingCooldown(getAttackTime());
-                    tmpMove.setOriginalCooldown(getMaxAttackTime());
-                    for (int i = 0; i < 4; ++i) {
-                        FOFMove m = MOVES_FOF.get(i);
-                        if (m != null && Objects.equals(m.getName(), move.getName())) {
-                            if (m.getRemainingCooldown() < 10) {
-                                setAttackTime(10);
-                                setMaxAttackTime(10);
-                            } else if (m.getRemainingCooldown() > 10) {
-                                setAttackTime(m.getRemainingCooldown());
-                                setMaxAttackTime(m.getOriginalCooldown());
-                            }
-                            break;
+            if (tmpMove != null && Objects.equals(tmpMove.getName(), oldMoveName)) {
+                tmpMove.setRemainingCooldown(getAttackTime());
+                tmpMove.setOriginalCooldown(getMaxAttackTime());
+                for (int i = 0; i < 4; ++i) {
+                    FOFMove m = MOVES_FOF.get(i);
+                    if (m != null && Objects.equals(m.getName(), move.getName())) {
+                        if (m.getRemainingCooldown() < 10) {
+                            setAttackTime(10);
+                            setMaxAttackTime(10);
+                        } else if (m.getRemainingCooldown() > 10) {
+                            setAttackTime(m.getRemainingCooldown());
+                            setMaxAttackTime(m.getOriginalCooldown());
                         }
+                        break;
                     }
-                    break;
                 }
+                break;
             }
             ++index;
         }

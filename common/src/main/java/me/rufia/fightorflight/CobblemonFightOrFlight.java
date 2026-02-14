@@ -89,7 +89,7 @@ public class CobblemonFightOrFlight {
 
     public static double getFightOrFlightCoefficient(PokemonEntity pokemonEntity) {
         if (!CobblemonFightOrFlight.commonConfig().do_pokemon_attack) {
-            return -100 - Math.abs(commonConfig().neutral_threshold);
+            return FOFAggressionCalculator.getPeacefulValue();
         }
 
         Pokemon pokemon = pokemonEntity.getPokemon();
@@ -98,21 +98,25 @@ public class CobblemonFightOrFlight {
         double height = pokemonEntity.position().y;
 
         if (SpeciesNeverAggro(speciesName) || SpeciesAlwaysFlee(speciesName)) {
-            return -100 - Math.abs(commonConfig().neutral_threshold);
+            return FOFAggressionCalculator.getPeacefulValue();
         }
 
         if (SpeciesAlwaysAggro(speciesName) || AspectsAlwaysAggro(pokemonAspects) || BelowAlwaysAggro(height)) {
-            return 100 + commonConfig().aggressive_threshold;
+            return FOFAggressionCalculator.getAggressiveValue();
         }
 
-        List<String> peacefulBiomeList = Arrays.stream(CobblemonFightOrFlight.commonConfig.peaceful_biome).toList();
+        List<String> peacefulBiomeList = Arrays.stream(CobblemonFightOrFlight.commonConfig().peaceful_biome).toList();
+        List<String> neutralBiomeList = Arrays.stream(CobblemonFightOrFlight.commonConfig().neutral_biome).toList();
         List<String> aggressiveBiomeList = Arrays.stream(CobblemonFightOrFlight.commonConfig().aggressive_biome).toList();
         String biomeName = pokemonEntity.level().getBiome(pokemonEntity.blockPosition()).getRegisteredName();
         if (!peacefulBiomeList.isEmpty() && peacefulBiomeList.contains(biomeName)) {
-            return -100 - commonConfig().neutral_threshold;
+            return FOFAggressionCalculator.getPeacefulValue();
+        }
+        if (!neutralBiomeList.isEmpty() && neutralBiomeList.contains(biomeName)) {
+            return FOFAggressionCalculator.getNeutralValue();
         }
         if (!aggressiveBiomeList.isEmpty() && aggressiveBiomeList.contains(biomeName)) {
-            return 100 + commonConfig().aggressive_threshold;
+            return FOFAggressionCalculator.getAggressiveValue();
         }
 
         return FOFAggressionCalculator.calc(pokemonEntity);

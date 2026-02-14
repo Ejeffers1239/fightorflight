@@ -13,6 +13,18 @@ import java.util.List;
 public class FOFAggressionCalculator {
     private static final List<Double> sideModExtraAggressionList = new ArrayList<>();
 
+    public static double getAggressiveValue() {
+        return 100 + CobblemonFightOrFlight.commonConfig().aggressive_threshold;
+    }
+
+    public static double getNeutralValue() {
+        return (CobblemonFightOrFlight.commonConfig().neutral_threshold + CobblemonFightOrFlight.commonConfig().aggressive_threshold) * 0.5;
+    }
+
+    public static double getPeacefulValue() {
+        return -100 - Math.abs(CobblemonFightOrFlight.commonConfig().neutral_threshold);
+    }
+
     protected static double getAtkDefDifCoefficient(Pokemon pokemon) {
         return (double) ((pokemon.getAttack() + pokemon.getSpecialAttack()) - (pokemon.getDefence() + pokemon.getSpecialDefence())) / pokemon.getLevel() * CobblemonFightOrFlight.commonConfig().aggression_atk_def_dif_base_value;
     }

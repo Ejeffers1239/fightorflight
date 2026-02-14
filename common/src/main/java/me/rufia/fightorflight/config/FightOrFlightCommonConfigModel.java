@@ -73,6 +73,9 @@ public class FightOrFlightCommonConfigModel implements ConfigData {
     public String[] peaceful_biome={
             "minecraft:deep_dark"
     };
+    @Comment("Pokemon will be neutral in these biomes")
+    public String[] neutral_biome={
+    };
     @Comment("Pokemon will always be aggressive in these biomes")
     public String[] aggressive_biome={
     };
