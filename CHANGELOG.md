@@ -1,12 +1,13 @@
 # V0.10.7:
 ### New Features:
-* Added config to make the pokemon aggressive/passive in specific biomes.
 * Using a new packet and handler so a keybind added a long time ago can work properly now. This is used to start a battle with an aggressive pokemon around the player so you don't need to aim at it.
 * PVE Battles started with this mod will use the selected Pokemon now.
-### Planned Features:
-#### This version is focused to offer some QoL features:
-* Aggressive pokemon will lose its aggression after the player is distant from the pokemon.
-* Multiplier for pokemon that is not fully evolved.
+### New Config:
+* peaceful_biome: Pokemon will be peaceful in these biomes.
+* neutral_biome: Pokemon will be neutral in these biomes.
+* aggressive_biome: Pokemon will be aggressive in these biomes(Proactive attack needs to be enabled in advance)
+### Bug fixes:
+* Fixed the bug that player's pokemon did not protect themselves when hurt.
 
 # V0.10.6:
 ### New Config:

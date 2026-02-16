@@ -352,6 +352,10 @@ public class PokemonUtils {
         return pokemon.heldItem();
     }
 
+    public static boolean tryToAvoidWildShiny(PokemonEntity pokemonEntity){
+        return pokemonEntity.getPokemon().getShiny() && !pokemonEntity.getPokemon().isPlayerOwned() && CobblemonFightOrFlight.commonConfig().not_attacking_wild_shiny;
+    }
+
     public static boolean isUsingNewHealthMechanic() {
         return CobblemonFightOrFlight.commonConfig().shouldOverrideHealthMechanic;
     }
@@ -443,7 +447,6 @@ public class PokemonUtils {
     public static String getCommandData(PokemonEntity pokemonEntity) {
         return ((PokemonInterface) pokemonEntity).getCommandData();
     }
-
 
     public static boolean moveCommandAvailable(PokemonEntity pokemonEntity) {
         return pokemonEntity.getOwner() != null && PokeStaffComponent.CMDMODE.MOVE == getCommandMode(pokemonEntity);

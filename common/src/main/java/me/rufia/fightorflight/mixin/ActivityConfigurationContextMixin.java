@@ -5,6 +5,7 @@ import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.mojang.datafixers.util.Pair;
 import me.rufia.fightorflight.CobblemonFightOrFlight;
 import me.rufia.fightorflight.entity.ai.tasks.FOFBackUpIfTooClose;
+import me.rufia.fightorflight.entity.ai.tasks.FOFDefendSelfTask;
 import me.rufia.fightorflight.entity.ai.tasks.FOFPokemonRangeTask;
 import me.rufia.fightorflight.utils.PokemonUtils;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,10 +34,8 @@ public abstract class ActivityConfigurationContextMixin {
     @Inject(method = "apply", at = @At("HEAD"), remap = false)
     private void applyMixin(LivingEntity entity, CallbackInfo ci) {
         if (entity instanceof PokemonEntity) {
-            //CobblemonFightOrFlight.LOGGER.info("{} is loading activity", entity.getName().getString());
             if (Objects.equals(activity.getName(), "fight")) {
                 if (CobblemonFightOrFlight.commonConfig().use_range_attack) {
-                    //CobblemonFightOrFlight.LOGGER.info("{} is loading fight activity", entity.getName().getString());
                     tasks.add(new Pair<>(0, BehaviorBuilder.triggerIf(
                             livingEntity -> {
                                 if (livingEntity instanceof PokemonEntity pokemonEntity) {
@@ -47,8 +46,10 @@ public abstract class ActivityConfigurationContextMixin {
                             FOFBackUpIfTooClose.create(5, 0.75f)
                     )));
                     tasks.add(new Pair<>(1, new FOFPokemonRangeTask()));
-                    //CobblemonFightOrFlight.LOGGER.info("{} fight activity tasks count:{}", entity.getName().getString(), tasks.size());
                 }
+            }
+            if (Objects.equals(activity.getName(), "idle")) {
+                tasks.add(new Pair<>(0, FOFDefendSelfTask.create()));
             }
         }
     }

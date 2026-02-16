@@ -70,14 +70,14 @@ public class FightOrFlightCommonConfigModel implements ConfigData {
     @Comment("The aggression multiplier for natures above.")
     public float more_peaceful_nature_multiplier = -2f;
     @Comment("Pokemon won't be aggressive in these biomes")
-    public String[] peaceful_biome={
+    public String[] peaceful_biome = {
             "minecraft:deep_dark"
     };
     @Comment("Pokemon will be neutral in these biomes")
-    public String[] neutral_biome={
+    public String[] neutral_biome = {
     };
     @Comment("Pokemon will always be aggressive in these biomes")
-    public String[] aggressive_biome={
+    public String[] aggressive_biome = {
     };
     @Comment("Forms that will always be aggressive")
     public String[] always_aggro_aspects = {

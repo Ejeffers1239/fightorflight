@@ -1,29 +1,28 @@
 package me.rufia.fightorflight.entity.ai.tasks;
 
-import com.cobblemon.mod.common.CobblemonMemories;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import me.rufia.fightorflight.utils.PokemonUtils;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.OneShot;
 import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
-public class FOFDefendOwnerTask {
-    public static OneShot<PokemonEntity> create() {
+public class FOFDefendSelfTask {
+    public static OneShot<LivingEntity> create() {
         return BehaviorBuilder.create(context ->
                 context.group(
-                                context.present(CobblemonMemories.NEAREST_VISIBLE_ATTACKER),
+                                context.present(MemoryModuleType.HURT_BY_ENTITY),
                                 context.absent(MemoryModuleType.ATTACK_TARGET)
                         )
-                        .apply(context, (visibleAttackerAccessor, attackTargetAccessor) -> ((serverLevel, pokemonEntity, l) -> {
-                            var attacker = context.get(visibleAttackerAccessor);
-                            if (attacker instanceof PokemonEntity targetPokemon) {
-                                if (PokemonUtils.tryToAvoidWildShiny(targetPokemon)) {
+                        .apply(context, (hurtByAccessor, attackTargetAccessor) -> ((serverLevel, pokemonEntity, l) -> {
+                            var hurtByEntity = context.get(hurtByAccessor);
+                            if (hurtByEntity instanceof PokemonEntity pokemonEntity1) {
+                                if (PokemonUtils.tryToAvoidWildShiny(pokemonEntity1)) {
                                     return false;
                                 }
                             }
-                            attackTargetAccessor.set(attacker);
+                            attackTargetAccessor.set(hurtByEntity);
                             return true;
                         })));
-
     }
 }

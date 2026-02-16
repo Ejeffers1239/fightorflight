@@ -196,6 +196,7 @@ public abstract class PokemonEntityMixin extends TamableAnimal implements Pokemo
         hashSet.add(FOFSensors.POKEMON_CAUGHT_BY);
         hashSet.add(FOFSensors.POKESTAFF_ATTACK_TARGET);
         hashSet.add(FOFSensors.POKESTAFF_WALK_TARGET);
+        hashSet.add(SensorType.HURT_BY);
         return Set.copyOf(hashSet);
     }
 
@@ -422,7 +423,6 @@ public abstract class PokemonEntityMixin extends TamableAnimal implements Pokemo
                     PokemonUtils.pokemonForceEncounterPvP(player, thisEntity);
                     cir.setReturnValue(false);
                 }
-
             }
             if (!PokemonAttackEffect.shouldBeHurtByAllyMob(((PokemonEntity) (Object) this), livingEntity)) {
                 cir.setReturnValue(false);

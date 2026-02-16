@@ -3,6 +3,7 @@ package me.rufia.fightorflight.entity.ai.sensors;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import me.rufia.fightorflight.CobblemonFightOrFlight;
 import me.rufia.fightorflight.PokemonInterface;
+import me.rufia.fightorflight.utils.PokemonUtils;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -47,7 +48,7 @@ public class PokemonHelpOwnerSensor extends Sensor<PokemonEntity> {
         var nearestAttacker = visibleMobs.findClosest(livingEntity -> {
             var lastHurtByMob = livingEntity.getLastHurtByMob();
             if (lastHurtByMob instanceof PokemonEntity pokemonEntity1) {
-                if (pokemonEntity1.getPokemon().getShiny() && !pokemonEntity1.getPokemon().isPlayerOwned() && CobblemonFightOrFlight.commonConfig().not_attacking_wild_shiny) {
+                if (PokemonUtils.tryToAvoidWildShiny(pokemonEntity1)) {
                     return false;
                 }
             }
