@@ -808,7 +808,7 @@ public class PokemonAttackEffect {
         applySFX(pokemonEntity.level(), move, pokemonEntity.blockPosition());
         PokemonUtils.setHurtByPlayer(pokemonEntity, hurtTarget);
 
-        boolean flag = hurtTarget.hurt(pokemonEntity.level().damageSources().mobAttack(pokemonEntity), hurtDamage);
+        boolean flag = hurtTarget.hurt(pokemonEntity.level().damageSources().mobAttack(pokemonEntity.getOwner()), hurtDamage);
         if (flag) {
             if (hurtTarget instanceof LivingEntity livingEntity) {
                 if (CobblemonFightOrFlight.commonConfig().activate_type_effect) {
